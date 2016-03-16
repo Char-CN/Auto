@@ -10,7 +10,7 @@ package org.blazer.dataload.model;
  * @author hyy
  *
  */
-public enum ImportMode {
+public enum InputMode {
 
 	Trunsaction, FaultTolerant
 

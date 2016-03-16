@@ -20,6 +20,8 @@ public class ALInputFileBean {
 
 	private String inputSql;
 
+	private InputMode inputMode;
+
 	private char fileSeparator;
 
 	private Integer sort;
@@ -184,6 +186,14 @@ public class ALInputFileBean {
 
 	public void setInputSql(String inputSql) {
 		this.inputSql = inputSql;
+	}
+
+	public InputMode getInputMode() {
+		return inputMode;
+	}
+
+	public void setInputMode(InputMode inputMode) {
+		this.inputMode = inputMode;
 	}
 
 	public char getFileSeparator() {

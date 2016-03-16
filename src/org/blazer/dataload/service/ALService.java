@@ -21,6 +21,7 @@ import org.blazer.dataload.model.ALInputFileBeforeBean;
 import org.blazer.dataload.model.ALInputFileConstantBean;
 import org.blazer.dataload.model.ALInputFileFieldBean;
 import org.blazer.dataload.model.FileVariable;
+import org.blazer.dataload.model.InputMode;
 import org.blazer.dataload.model.KeyCombine;
 import org.blazer.dataload.util.FieldUtil;
 import org.blazer.dataload.util.StringUtil;
@@ -237,12 +238,17 @@ public class ALService {
 	 * @param aifBean
 	 */
 	public void setConvertSqls(final List<HashMap<String, String>> rowList, final List<String> sqlList, final ALInputFileBean aifBean) {
+		logger.info("----Begin----------------------------------------");
+		logger.info("-- param rowList size : {}", rowList.size());
+		long l1 = System.currentTimeMillis();
 		if (sqlList.size() == 0) {
 			List<String> retList = new ArrayList<String>();
 			aifBean.setExtInputSQLList(retList);
 			return;
 		}
+		Count count = new Count(0, 5000);
 		for (HashMap<String, String> columnMap : rowList) {
+			count.add(1);
 			for (String sql : sqlList) {
 				String replaceSql = sql;
 				for (String key : columnMap.keySet()) {
@@ -251,7 +257,17 @@ public class ALService {
 				}
 				aifBean.getExtInputSQLList().add(replaceSql);
 			}
+			if (count.modZero()) {
+				logger.info("converted " + count.getCount());
+			}
 		}
+		if (count.getCount() == 0 || !count.modZero()) {
+			logger.info("converted " + count.getCount());
+		}
+		long l2 = System.currentTimeMillis();
+		logger.info("-- method cost time   : {}", l2 - l1);
+		logger.info("----End------------------------------------------");
+		
 	}
 
 	/**
@@ -262,12 +278,17 @@ public class ALService {
 	 * @param aifBean
 	 */
 	public void setConvertSqlsByCsv(final List<HashMap<String, String>> rowList, final List<String> sqlList, final ALInputFileBean aifBean) {
+		logger.info("----Begin----------------------------------------");
+		logger.info("-- param rowList size : {}", rowList.size());
+		long l1 = System.currentTimeMillis();
 		if (sqlList.size() == 0) {
 			List<String> retList = new ArrayList<String>();
 			aifBean.setExtInputSQLList(retList);
 			return;
 		}
+		Count count = new Count(0, 5000);
 		for (HashMap<String, String> columnMap : rowList) {
+			count.add(1);
 			for (String sql : sqlList) {
 				String replaceSql = sql;
 				for (String key : columnMap.keySet()) {
@@ -276,7 +297,16 @@ public class ALService {
 				}
 				aifBean.getExtInputSQLList().add(replaceSql);
 			}
+			if (count.modZero()) {
+				logger.info("converted " + count.getCount());
+			}
 		}
+		if (count.getCount() == 0 || !count.modZero()) {
+			logger.info("converted " + count.getCount());
+		}
+		long l2 = System.currentTimeMillis();
+		logger.info("-- method cost time   : {}", l2 - l1);
+		logger.info("----End------------------------------------------");
 	}
 
 	/**
@@ -851,6 +881,12 @@ public class ALService {
 			}
 			aifb.setFileRegExp(StringUtil.getString(map.get("FileRegExp")));
 			aifb.setInputSql(StringUtil.getString(map.get("InputSql")));
+			// 事务模式 或 容错模式
+			if (map.get("InputMode") == null || "1".equals(StringUtil.getString(map.get("InputMode")))) {
+				aifb.setInputMode(InputMode.Trunsaction);
+			} else {
+				aifb.setInputMode(InputMode.FaultTolerant);
+			}
 			aifb.setSort(IntegerUtil.getInteger(map.get("Sort")));
 			aifb.setEnable(IntegerUtil.getInteger(map.get("Enable")));
 			String fileSeparator = StringUtil.getString(map.get("FileSeparator"));

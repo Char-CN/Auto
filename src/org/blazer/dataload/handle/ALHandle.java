@@ -225,6 +225,9 @@ public class ALHandle {
 							throw new FileEmptyException("the file is empty");
 						} else {
 							logger.info("=== row 1 length: [{}]", list.get(0).length);
+							if (list.get(0).length > FieldUtil.getDefaultSqlPlaceholderSize()) {
+								logger.info("=== Notice : row 1 length > System Default Sql Placeholder Size [" + FieldUtil.getDefaultSqlPlaceholderSize() + "], may be a problem.");
+							}
 							for (String key : rowList.get(0).keySet()) {
 								logger.info("=== row 1 Point[{}] : {}", key, rowList.get(0).get(key));
 							}
