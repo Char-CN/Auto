@@ -65,9 +65,7 @@
 		<copy todir="${output.dir}/${doc.dir}">
 			<fileset dir="${doc.dir}" />
 		</copy>
-		<copy todir="${output.dir}/${lock.dir}">
-			<fileset dir="${lock.dir}" />
-		</copy>
+		<mkdir dir="${output.dir}/${lock.dir}" />
 
 		<!--Create a property containing all .jar files,
         prefix lib/, and seperated with a space-->
@@ -93,6 +91,6 @@
 
 		<!-- zip 文件Œ
 		-->
-		<zip destfile="${tar.dir}/${name}-${version}.zip" basedir="${output.dir}" />
+		<zip destfile="${output.dir}/${name}-${version}.zip" basedir="${output.dir}" />
 	</target>
 </project>
