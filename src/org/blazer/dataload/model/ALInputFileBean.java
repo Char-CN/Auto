@@ -48,9 +48,19 @@ public class ALInputFileBean {
 
 	// private TargetSource extTargetSource;
 
+	private List<String> extOldInputSQLList;
+
 	private List<String> extInputSQLList;
 
 	private HashMap<String, String> currentFileVar;
+
+	public List<String> getExtOldInputSQLList() {
+		return extOldInputSQLList;
+	}
+
+	public void setExtOldInputSQLList(List<String> extOldInputSQLList) {
+		this.extOldInputSQLList = extOldInputSQLList;
+	}
 
 	public HashMap<String, String> getCurrentFileVar() {
 		return currentFileVar;

@@ -39,6 +39,22 @@ public class ALLogService {
 		}
 		log(aif, "fail", sb.toString());
 	}
+	
+	/**
+	 * 记录正确日志，如果有error，一样记录
+	 * 
+	 * @param aif
+	 */
+	public void successLog(ALInputFileBean aif, Exception e) {
+		if (!SysConfig.databaseLogSuccessFlag) {
+			return;
+		}
+		StringBuilder sb = new StringBuilder(e.toString());
+		for (StackTraceElement ste : e.getStackTrace()) {
+			sb.append("\r\n    at ").append(ste.toString());
+		}
+		log(aif, "success", sb.toString());
+	}
 
 	/**
 	 * 记录正确日志

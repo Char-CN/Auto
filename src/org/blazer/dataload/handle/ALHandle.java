@@ -272,9 +272,9 @@ public class ALHandle {
 							throw new UnknowTargetSourceException("the target source is not found");
 						} else if (aif.getDataSourceBean().getTargetSourceDBName().equalsIgnoreCase("csv")) {
 							step = 16;
-							List<String> sqlList = alService.convertInputSqlsByMysql(aif);
+							alService.convertInputSqlsByMysql(aif);
 							step = 17;
-							alService.setConvertSqlsByCsv(rowList, sqlList, aif);
+							alService.placeholderReplaceByCsv(rowList, aif);
 							step = 18;
 							// 导出成后缀名为.al的文件
 							alService.outputToFile(aif);
@@ -287,9 +287,9 @@ public class ALHandle {
 								alService.insertInputBefore(beforeBean);
 							}
 							step = 16.3;
-							List<String> sqlList = alService.convertInputSqlsByMysql(aif);
+							alService.convertInputSqlsByMysql(aif);
 							step = 17;
-							alService.setConvertSqls(rowList, sqlList, aif);
+							alService.placeholderReplaceByMysql(rowList, aif);
 							step = 18;
 							// 执行sql语句导入数据到mysql
 							alService.insertInputFile(aif);

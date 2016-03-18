@@ -74,4 +74,10 @@ public class ALDataSourceBean {
 		this.password = password;
 	}
 
+	@Override
+	public String toString() {
+		return "ALDataSourceBean [recordId=" + recordId + ", targetSourceDBName=" + targetSourceDBName + ", name=" + name + ", url=" + url + ", userName="
+				+ userName + "]";
+	}
+
 }

@@ -13,6 +13,8 @@ public class FieldUtil {
 	private static int DEFAULT_SQL_PLACEHOLDER_SIZE = 50;
 	public static final String PK_FIELD = "#PK#";
 	public static final String UP_FIELD = "#UP#";
+	public static final String MATCH_BEGIN = "{";
+	public static final String MATCH_END = "}";
 
 	public static void main(String[] args) {
 		System.out.println(FieldUtil.LINE.get(50));
@@ -42,7 +44,7 @@ public class FieldUtil {
 
 		{
 			for (int i = 1; i <= DEFAULT_SQL_PLACEHOLDER_SIZE; i++) {
-				put(i, "{" + i + "}");
+				put(i, MATCH_BEGIN + i + MATCH_END);
 			}
 		}
 
@@ -54,7 +56,7 @@ public class FieldUtil {
 
 		{
 			for (int i = 1; i <= DEFAULT_SQL_PLACEHOLDER_SIZE; i++) {
-				put("{" + i + "}", i);
+				put(MATCH_BEGIN + i + MATCH_END, i);
 			}
 		}
 

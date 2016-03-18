@@ -78,21 +78,19 @@ public class TransactionDao implements Dao {
 		return jdbcTemplate.queryForList(findSql).get(0);
 	}
 
-	public void batchUpdate(String[] sqls) throws RuntimeException {
-		batchUpdate(sqls, -1);
+	public void batchUpdateTranstaion(String[] sqls) throws RuntimeException {
+		batchUpdateTranstaion(sqls, 5000);
 	}
 
-	public void batchUpdate(String[] sqls, Integer interval) throws RuntimeException {
-		if (interval == -1)
-			interval = 5000;
+	public void batchUpdateTranstaion(String[] sqls, Integer interval) throws RuntimeException {
 		Count count = new Count(0, interval);
-		batchUpdate(sqls, count);
+		batchUpdateTranstaion(sqls, count);
 	}
 
-	public void batchUpdate(String[] sqls, Count count) throws RuntimeException {
-		logger.debug("=====batchUpdate===== Length : {}", sqls.length);
+	public void batchUpdateTranstaion(String[] sqls, Count count) throws RuntimeException {
+		logger.debug("=====batchUpdateTranstaion===== Length : {}", sqls.length);
 		try {
-			logger.info("batchUpdate begin");
+			logger.info("batchUpdateTranstaion begin");
 			beginTranstaion();
 			for (String sql : sqls) {
 				count.add(1);
@@ -103,29 +101,27 @@ public class TransactionDao implements Dao {
 			if (count.getCount() == 0 || !count.modZero())
 				logger.info("imported " + count.getCount());
 			commit();
-			logger.info("batchUpdate commit");
+			logger.info("batchUpdateTranstaion commit");
 		} catch (RuntimeException e) {
 			rollback();
-			logger.error("batchUpdate rollback");
+			logger.error("batchUpdateTranstaion rollback");
 			throw e;
 		}
 	}
 
-	public void batchUpdate(List<String> sqls) throws RuntimeException {
-		batchUpdate(sqls, -1);
+	public void batchUpdateTranstaion(List<String> sqls) throws RuntimeException {
+		batchUpdateTranstaion(sqls, 5000);
 	}
 
-	public void batchUpdate(List<String> sqls, Integer interval) throws RuntimeException {
-		if (interval == -1)
-			interval = 5000;
+	public void batchUpdateTranstaion(List<String> sqls, Integer interval) throws RuntimeException {
 		Count count = new Count(0, interval);
-		batchUpdate(sqls, count);
+		batchUpdateTranstaion(sqls, count);
 	}
 
-	public void batchUpdate(List<String> sqls, Count count) throws RuntimeException {
-		logger.debug("=====batchUpdate===== Length : {}", sqls.size());
+	public void batchUpdateTranstaion(List<String> sqls, Count count) throws RuntimeException {
+		logger.debug("=====batchUpdateTranstaion===== Length : {}", sqls.size());
 		try {
-			logger.info("batchUpdate begin");
+			logger.info("batchUpdateTranstaion begin");
 			beginTranstaion();
 			for (String sql : sqls) {
 				count.add(1);
@@ -136,10 +132,10 @@ public class TransactionDao implements Dao {
 			if (count.getCount() == 0 || !count.modZero())
 				logger.info("imported " + count.getCount());
 			commit();
-			logger.info("batchUpdate commit");
+			logger.info("batchUpdateTranstaion commit");
 		} catch (RuntimeException e) {
 			rollback();
-			logger.error("batchUpdate rollback");
+			logger.error("batchUpdateTranstaion rollback");
 			throw e;
 		}
 	}
@@ -178,7 +174,7 @@ public class TransactionDao implements Dao {
 		String sql5 = "insert into test(name,lastperiod,age,remark) values('null','702',null,'{.}');";
 		String sql6 = "insert into test(asd) values(asd);";
 		String[] sqls = new String[] { sql1, sql2, sql6, sql3, sql4, sql5 };
-		dao.batchUpdate(sqls);
+		dao.batchUpdateTranstaion(sqls);
 		dao.update(sql1);
 	}
 

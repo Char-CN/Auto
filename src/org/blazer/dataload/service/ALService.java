@@ -12,6 +12,7 @@ import org.blazer.common.dao.Dao;
 import org.blazer.common.dao.JDBCDao;
 import org.blazer.common.util.Count;
 import org.blazer.common.util.IntegerUtil;
+import org.blazer.common.util.SysConfig;
 import org.blazer.dataload.datasource.CustomJdbcDao;
 import org.blazer.dataload.exception.UnknowDataSourceException;
 import org.blazer.dataload.model.ALConvert;
@@ -23,7 +24,9 @@ import org.blazer.dataload.model.ALInputFileFieldBean;
 import org.blazer.dataload.model.FileVariable;
 import org.blazer.dataload.model.InputMode;
 import org.blazer.dataload.model.KeyCombine;
+import org.blazer.dataload.model.SQLParser;
 import org.blazer.dataload.util.FieldUtil;
+import org.blazer.dataload.util.SqlUtil;
 import org.blazer.dataload.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,7 +46,7 @@ public class ALService {
 			for (String sql : StringUtils.split(beforeBean.getBeforeSql(), ";")) {
 				// 先转换当前文件变量
 				for (ALInputFileConstantBean constantBean : beforeBean.getInputFileBean().getAlInputFileConstantBeans()) {
-					sql = sql.replace(constantBean.getFieldPointName(), convertStr(constantBean.getResultValue()));
+					sql = sql.replace(constantBean.getFieldPointName(), SqlUtil.convertStr(constantBean.getResultValue()));
 				}
 				beforeBean.getExtInputSQLList().add(sql);
 			}
@@ -57,14 +60,15 @@ public class ALService {
 	 * @return
 	 * @throws Exception
 	 */
-	public List<String> convertInputSqlsByMysql(final ALInputFileBean aif) throws Exception {
+	public void convertInputSqlsByMysql(final ALInputFileBean aif) throws Exception {
 		long l1 = System.currentTimeMillis();
 		String inputSql = aif.getInputSql();
 		logger.info("----Begin----------------------------------------");
 		logger.info("-- param inputSql     : {}", inputSql);
-		List<String> sqlList = new ArrayList<String>();
+		List<String> oldSqlList = new ArrayList<String>();
+		aif.setExtOldInputSQLList(oldSqlList);
 		if (StringUtils.isBlank(inputSql) || inputSql.trim().equals(";")) {
-			return sqlList;
+			return;
 		}
 		try {
 			// INSERT INTO
@@ -78,17 +82,15 @@ public class ALService {
 				}
 				// 先转换当前文件变量
 				for (ALInputFileConstantBean constantBean : aif.getAlInputFileConstantBeans()) {
-					sql = sql.replace(constantBean.getFieldPointName(), convertStr(constantBean.getResultValue()));
+					sql = sql.replace(constantBean.getFieldPointName(), SqlUtil.convertStr(constantBean.getResultValue()));
 				}
 				String upperSql = sql.toUpperCase();
 				if (upperSql.indexOf("INSERT") == -1 || upperSql.indexOf("ON DUPLICATE KEY UPDATE") != -1) {
-//					sqlList.add(sql + ";");
-					sqlList.add(sql);
+					oldSqlList.add(sql);
 					continue;
 				}
 				if (upperSql.indexOf("#UP#") == -1) {
-//					sqlList.add(sql + ";");
-					sqlList.add(sql);
+					oldSqlList.add(sql);
 					continue;
 				}
 				onDuplicateKeyUpdate = " ON DUPLICATE KEY UPDATE ";
@@ -110,24 +112,20 @@ public class ALService {
 				}
 				sql = sql.replace("#PK#=", "");
 				sql = sql.replace("#UP#=", "");
-				// retSql += sql + onDuplicateKeyUpdate + ";";
-//				sqlList.add(sql + onDuplicateKeyUpdate + ";");
-				sqlList.add(sql + onDuplicateKeyUpdate);
+				oldSqlList.add(sql + onDuplicateKeyUpdate);
 			}
 		} catch (Exception e) {
-			// logger.error(e.getMessage(), e);
 			throw e;
 		} finally {
 			long l2 = System.currentTimeMillis();
-			if (sqlList.size() == 1) {
-				logger.info("-- param sqlList size : {}", sqlList.size());
+			if (oldSqlList.size() == 1) {
+				logger.info("-- param oldSqlList size : {}", oldSqlList.size());
 			} else {
-				logger.info("-- param sqlList size : {} > 1, sql config may be mulit ';'", sqlList.size());
+				logger.info("-- param oldSqlList size : {} > 1, sql config may be mulit ';'", oldSqlList.size());
 			}
 			logger.info("-- method cost time   : {}", l2 - l1);
 			logger.info("----End------------------------------------------");
 		}
-		return sqlList;
 	}
 
 	/**
@@ -159,7 +157,7 @@ public class ALService {
 		String inputSql = dimBean.getExtInputSQL();
 		// 先转换当前文件变量
 		for (ALInputFileConstantBean constantBean : dimBean.getInputFileBean().getAlInputFileConstantBeans()) {
-			inputSql = inputSql.replace(constantBean.getFieldPointName(), convertStr(constantBean.getResultValue()));
+			inputSql = inputSql.replace(constantBean.getFieldPointName(), SqlUtil.convertStr(constantBean.getResultValue()));
 		}
 		for (HashMap<String, String> columnMap : rowList) {
 			// 创建一个KeyCombine对象取值
@@ -178,7 +176,7 @@ public class ALService {
 			String dimInputSql = inputSql;
 			// 替换sql中的占位
 			for (int i = 0; i < kc.getKeyList().size(); i++) {
-				dimInputSql = dimInputSql.replace(kc.getKeyPointList().get(i), convertStr(kc.getKeyList().get(i)));
+				dimInputSql = dimInputSql.replace(kc.getKeyPointList().get(i), SqlUtil.convertStr(kc.getKeyList().get(i)));
 			}
 			dimBean.getExtInputSQLList().add(dimInputSql);
 			dimBean.getExtDimKeyCombineValMap().put(kc, null);
@@ -218,11 +216,11 @@ public class ALService {
 				String inputSql = dimBean.getExtInputSQL();
 				// 先转换当前文件变量
 				for (ALInputFileConstantBean constantBean : dimBean.getInputFileBean().getAlInputFileConstantBeans()) {
-					inputSql = inputSql.replace(constantBean.getFieldPointName(), convertStr(constantBean.getResultValue()));
+					inputSql = inputSql.replace(constantBean.getFieldPointName(), SqlUtil.convertStr(constantBean.getResultValue()));
 				}
 				// 替换sql中的占位
 				for (int i = 0; i < kc.getKeyList().size(); i++) {
-					inputSql = inputSql.replace(kc.getKeyPointList().get(i), convertStr(kc.getKeyList().get(i)));
+					inputSql = inputSql.replace(kc.getKeyPointList().get(i), SqlUtil.convertStr(kc.getKeyList().get(i)));
 				}
 				dimBean.getExtInputSQLList().add(inputSql);
 				dimBean.getExtDimKeyCombineValMap().put(kc, null);
@@ -237,24 +235,24 @@ public class ALService {
 	 * @param sqlList
 	 * @param aifBean
 	 */
-	public void setConvertSqls(final List<HashMap<String, String>> rowList, final List<String> sqlList, final ALInputFileBean aifBean) {
+	public void placeholderReplaceByMysql(final List<HashMap<String, String>> rowList, final ALInputFileBean aifBean) {
 		logger.info("----Begin----------------------------------------");
 		logger.info("-- param rowList size : {}", rowList.size());
 		long l1 = System.currentTimeMillis();
-		if (sqlList.size() == 0) {
+		List<String> oldSqlList = aifBean.getExtOldInputSQLList();
+		if (oldSqlList.size() == 0) {
 			List<String> retList = new ArrayList<String>();
 			aifBean.setExtInputSQLList(retList);
 			return;
 		}
+		// 1.提高效率
+		// 2.修复bug：直接replace会导致:前一个中含有本次需要replace的key的值,将前一个中的参数也替换成本参数
+		List<List<SQLParser>> sqlParserLists = SqlUtil.placeholderMappingPoints(oldSqlList);
 		Count count = new Count(0, 5000);
 		for (HashMap<String, String> columnMap : rowList) {
 			count.add(1);
-			for (String sql : sqlList) {
-				String replaceSql = sql;
-				for (String key : columnMap.keySet()) {
-					// 直接replace会导致:前一个中含有本次需要replace的key的值,将前一个中的参数也替换成本参数
-					replaceSql = replaceSql.replace(key, convertStr(columnMap.get(key)));
-				}
+			for (int i = 0; i < oldSqlList.size(); i++) {
+				String replaceSql = SqlUtil.placeholderReplaceConvertStr(oldSqlList.get(i), sqlParserLists.get(i), columnMap);
 				aifBean.getExtInputSQLList().add(replaceSql);
 			}
 			if (count.modZero()) {
@@ -267,7 +265,6 @@ public class ALService {
 		long l2 = System.currentTimeMillis();
 		logger.info("-- method cost time   : {}", l2 - l1);
 		logger.info("----End------------------------------------------");
-		
 	}
 
 	/**
@@ -277,24 +274,24 @@ public class ALService {
 	 * @param sqlList
 	 * @param aifBean
 	 */
-	public void setConvertSqlsByCsv(final List<HashMap<String, String>> rowList, final List<String> sqlList, final ALInputFileBean aifBean) {
+	public void placeholderReplaceByCsv(final List<HashMap<String, String>> rowList, final ALInputFileBean aifBean) {
 		logger.info("----Begin----------------------------------------");
 		logger.info("-- param rowList size : {}", rowList.size());
 		long l1 = System.currentTimeMillis();
-		if (sqlList.size() == 0) {
+		List<String> oldSqlList = aifBean.getExtOldInputSQLList();
+		if (oldSqlList.size() == 0) {
 			List<String> retList = new ArrayList<String>();
 			aifBean.setExtInputSQLList(retList);
 			return;
 		}
+		// 1.提高效率
+		// 2.修复bug：直接replace会导致:前一个中含有本次需要replace的key的值,将前一个中的参数也替换成本参数
+		List<List<SQLParser>> sqlParserLists = SqlUtil.placeholderMappingPoints(oldSqlList);
 		Count count = new Count(0, 5000);
 		for (HashMap<String, String> columnMap : rowList) {
 			count.add(1);
-			for (String sql : sqlList) {
-				String replaceSql = sql;
-				for (String key : columnMap.keySet()) {
-					// 直接replace会导致:前一个中含有本次需要replace的key的值,将前一个中的参数也替换成本参数
-					replaceSql = replaceSql.replace(key, "" + columnMap.get(key));
-				}
+			for (int i = 0; i < oldSqlList.size(); i++) {
+				String replaceSql = SqlUtil.placeholderReplace(oldSqlList.get(i), sqlParserLists.get(i), columnMap);
 				aifBean.getExtInputSQLList().add(replaceSql);
 			}
 			if (count.modZero()) {
@@ -480,24 +477,6 @@ public class ALService {
 	}
 
 	/**
-	 * 转换字符串
-	 */
-	private static String convertStr(String str) {
-		if (str == null) {
-			return "null";
-		}
-		// 转义斜杠
-		if (str.indexOf("\\") > -1) {
-			str = str.replace("\\", "\\\\");
-		}
-		// 转义引号
-		if (str.indexOf("'") > -1) {
-			str = str.replace("'", "\\'");
-		}
-		return "'" + str + "'";
-	}
-
-	/**
 	 * 转换value值, 根据aiffb.getConvertMethod()
 	 */
 	private static String getConvertMethodValue(final String value, final ALConvert convert) {
@@ -613,6 +592,7 @@ public class ALService {
 		aifBean.getAlInputFileConstantBeans().clear();
 		aifBean.getCurrentFileVar().clear();
 		aifBean.getExtInputSQLList().clear();
+		aifBean.getExtOldInputSQLList().clear();
 	}
 
 	/**
@@ -699,19 +679,20 @@ public class ALService {
 		long l1 = System.currentTimeMillis();
 		logger.info("----Begin----------------------------------------");
 		logger.info("-- param sqls length : {}", inputFile.getExtInputSQLList().size());
+		logger.info("-- param dataSource  : {}", inputFile.getDataSourceBean());
 		Dao executeDao = CustomJdbcDao.getDao(inputFile.getDataSourceBean().getRecordId());
 		Count count = new Count(0, 5000);
 		try {
 			int i = 1;
 			for (String record : inputFile.getExtInputSQLList()) {
-				if (i <= 10) {
+				if (i <= SysConfig.logPrintSqlSize) {
 					logger.info("-- param record {} : {}", i, record);
 					i++;
 				} else {
 					break;
 				}
 			}
-			executeDao.batchUpdate(inputFile.getExtInputSQLList(), count);
+			executeDao.batchUpdateTranstaion(inputFile.getExtInputSQLList(), count);
 		} catch (RuntimeException e) {
 			logger.error("error row : [{}]", count.getCount());
 			logger.error("error sql : [{}]", inputFile.getExtInputSQLList().get(count.getCount() - 1));
@@ -751,24 +732,26 @@ public class ALService {
 		long l1 = System.currentTimeMillis();
 		logger.info("----Begin----------------------------------------");
 		logger.info("-- param fileField   : {}", fileField);
+		logger.info("-- param dataSource  : {}", fileField.getDataSourceBean());
 		logger.info("-- param sqls length : {}", fileField.getExtInputSQLList().size());
 		Dao executeDao = CustomJdbcDao.getDao(fileField.getDataSourceBean().getRecordId());
 		Count count = new Count(0, 5000);
 		try {
 			int i = 1;
 			for (String record : fileField.getExtInputSQLList()) {
-				if (i <= 10) {
+				if (i <= SysConfig.logPrintSqlSize) {
 					logger.info("-- param record {} : {}", i, record);
 					i++;
 				} else {
 					break;
 				}
 			}
-			executeDao.batchUpdate(fileField.getExtInputSQLList(), count);
+			executeDao.batchUpdateTranstaion(fileField.getExtInputSQLList(), count);
 			// 重新加载KeyVal
 			setExtInfo(fileField);
 		} catch (RuntimeException e) {
 			logger.error("error row : [{}]", count.getCount());
+			logger.error("error sql : [{}]", fileField.getExtInputSQLList().get(count.getCount() - 1));
 			throw e;
 		} finally {
 			long l2 = System.currentTimeMillis();
@@ -786,23 +769,25 @@ public class ALService {
 	public void insertInputBefore(ALInputFileBeforeBean beforeBean) throws UnknowDataSourceException {
 		long l1 = System.currentTimeMillis();
 		logger.info("----Begin----------------------------------------");
-		logger.info("-- param beforeBean : {}", beforeBean);
+		logger.info("-- param beforeBean  : {}", beforeBean);
+		logger.info("-- param dataSource  : {}", beforeBean.getDataSourceBean());
 		logger.info("-- param sqls length : {}", beforeBean.getExtInputSQLList().size());
 		Dao executeDao = CustomJdbcDao.getDao(beforeBean.getDataSourceBean().getRecordId());
 		Count count = new Count(0, 5000);
 		try {
 			int i = 1;
 			for (String record : beforeBean.getExtInputSQLList()) {
-				if (i <= 10) {
+				if (i <= SysConfig.logPrintSqlSize) {
 					logger.info("-- param record {} : {}", i, record);
 					i++;
 				} else {
 					break;
 				}
 			}
-			executeDao.batchUpdate(beforeBean.getExtInputSQLList(), count);
+			executeDao.batchUpdateTranstaion(beforeBean.getExtInputSQLList(), count);
 		} catch (RuntimeException e) {
 			logger.error("error row : [{}]", count.getCount());
+			logger.error("error sql : [{}]", beforeBean.getExtInputSQLList().get(count.getCount() - 1));
 			throw e;
 		} finally {
 			long l2 = System.currentTimeMillis();
