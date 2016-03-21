@@ -356,7 +356,7 @@ public class ALService {
 			}
 			kc.setKeyList(keyList);
 			if (!dimBean.getExtDimKeyCombineValMap().containsKey(kc)) {
-				logger.info("Notice: Dim may be a problem , is not found value, point values {}", keyList);
+				logger.warn("Notice: Dim may be a problem , is not found value, point values {}", keyList);
 			} else {
 				String val = dimBean.getExtDimKeyCombineValMap().get(kc);
 				columnMap.put(dimBean.getFieldPointName(), val);
@@ -388,7 +388,7 @@ public class ALService {
 				}
 				kc.setKeyList(keyList);
 				if (!dimBean.getExtDimKeyCombineValMap().containsKey(kc)) {
-					logger.info("Notice: Dim may be a problem , is not found value, point values {}", keyList);
+					logger.warn("Notice: Dim may be a problem , is not found value, point values {}", keyList);
 				} else {
 					String val = dimBean.getExtDimKeyCombineValMap().get(kc);
 					columnMap.put(dimBean.getFieldPointName(), val);
@@ -944,7 +944,7 @@ public class ALService {
 			aiffb.setDimFlag(IntegerUtil.getInteger(map.get("DimFlag")));
 			aiffb.setFieldPointName(StringUtil.getString(map.get("FieldPointName")));
 			if (!FieldUtil.POINT.containsKey(aiffb.getFieldPointName())) {
-				logger.debug("Notice : [{}] is not valid in system defined", aiffb.getFieldPointName());
+				logger.warn("Notice : [{}] is not valid in system defined", aiffb.getFieldPointName());
 			}
 			aiffb.setConvertMethod(StringUtil.getString(map.get("ConvertMethod")));
 			aiffb.setDefaultValue(StringUtil.getString(map.get("DefaultValue")));
@@ -1020,7 +1020,7 @@ public class ALService {
 			constantBean.setFileId(IntegerUtil.getInteger(map.get("FileId")));
 			constantBean.setFieldPointName(StringUtil.getString(map.get("FieldPointName")));
 			if (!FieldUtil.POINT.containsKey(constantBean.getFieldPointName())) {
-				logger.debug("Notice : [{}] is not valid in system defined", constantBean.getFieldPointName());
+				logger.warn("Notice : [{}] is not valid in system defined", constantBean.getFieldPointName());
 			}
 			constantBean.setConvertMethod(StringUtil.getString(map.get("ConvertMethod")));
 			constantBean.setDefaultValue(StringUtil.getString(map.get("DefaultValue")));

@@ -24,6 +24,7 @@ import org.blazer.dataload.util.CsvUtil;
 import org.blazer.dataload.util.FieldUtil;
 import org.blazer.dataload.util.FileUtil;
 import org.blazer.dataload.util.LockUtil;
+import org.blazer.dataload.util.MapUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -226,10 +227,12 @@ public class ALHandle {
 						} else {
 							logger.info("=== row 1 length: [{}]", list.get(0).length);
 							if (list.get(0).length > FieldUtil.getDefaultSqlPlaceholderSize()) {
-								logger.info("=== Notice : row 1 length > System Default Sql Placeholder Size [" + FieldUtil.getDefaultSqlPlaceholderSize() + "], may be a problem.");
+								logger.warn("=== Notice : row 1 length > System Default Sql Placeholder Size [" + FieldUtil.getDefaultSqlPlaceholderSize() + "], may be a problem.");
 							}
-							for (String key : rowList.get(0).keySet()) {
-								logger.info("=== row 1 Point[{}] : {}", key, rowList.get(0).get(key));
+							// 排序
+							List<HashMap.Entry<String, String>> sorts = MapUtil.sorts(rowList.get(0).entrySet());
+							for (int i = 0; i < sorts.size(); i++) {
+							    logger.info("=== row 1 Point[{}] : {}", sorts.get(i).getKey(), sorts.get(i).getValue());
 							}
 						}
 						step = 11;
@@ -266,8 +269,7 @@ public class ALHandle {
 							alService.convertFileField2FieldPointByRowAndDims(rowList, aif.getAlInputFileFieldDimBeans());
 						}
 						step = 15;
-						logger.info("=== insert data start");
-						logger.info("=== targetSourceDBName [{}], enable [{}]", aif.getDataSourceBean().getTargetSourceDBName(), aif.getEnable());
+						logger.info("================== insert data start ==================");
 						if (aif.getDataSourceBean().getTargetSourceDBName() == null) {
 							throw new UnknowTargetSourceException("the target source is not found");
 						} else if (aif.getDataSourceBean().getTargetSourceDBName().equalsIgnoreCase("csv")) {
@@ -294,7 +296,7 @@ public class ALHandle {
 							// 执行sql语句导入数据到mysql
 							alService.insertInputFile(aif);
 						} else {
-							throw new UnknowTargetSourceException("the target source is not found");
+							throw new UnknowTargetSourceException("the target source is not found, please check you TargetSourceDBName is correct!");
 						}
 						fileProcessingResult = true;
 					} catch (UnknowDataSourceException e) {
@@ -343,7 +345,7 @@ public class ALHandle {
 					logger.info("=== one file cost time : {}", time);
 					step = 21;
 					if (time / 1000 / 60 > SysConfig.noticeFileProcessingMinute) {
-						logger.info("=== Notice : File processing time than expected");
+						logger.warn("=== Notice : File processing time than expected");
 					}
 					// 解锁
 					LockUtil.unLock(lockName);
