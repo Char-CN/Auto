@@ -91,6 +91,6 @@
 
 		<!-- zip 文件Œ
 		-->
-		<zip destfile="${output.dir}/${name}-${version}.zip" basedir="${output.dir}" />
+		<zip destfile="${output.dir}/${name}.jar-SNAPSHOT-v${version}.zip" basedir="${output.dir}" />
 	</target>
 </project>

@@ -41,6 +41,11 @@ public class ALHandle {
 		ApplicationUtil.init(SourceUtil.resource + "logback_autoload.xml");
 		ALHandle handle = (ALHandle) ApplicationUtil.getBean("ALHandle");
 		// testArgs = args;
+		if (args.length == 0) {
+			args = new String[] { "*", "*" };
+		} else if (args.length == 1) {
+			args = new String[] { args[0], "*" };
+		}
 		handle.handle(args, testArgs, SysConfig.test);
 	}
 
