@@ -480,15 +480,17 @@ public class ALService {
 	 * 转换value值, 根据aiffb.getConvertMethod()
 	 */
 	private static String getConvertMethodValue(final String value, final ALConvert convert) {
-		if (StringUtils.isBlank(value) || StringUtils.isBlank(convert.getConvertMethod())) {
+		if (StringUtils.isBlank(convert.getConvertMethod())) {
 			return value;
 		}
 		if (convert.getConvertMethod().equalsIgnoreCase("lower")) {
 			return value.toLowerCase();
 		} else if (convert.getConvertMethod().equalsIgnoreCase("upper")) {
 			return value.toUpperCase();
+		} else if (convert.getConvertMethod().equalsIgnoreCase("empty2null") && "".equals(value)) {
+			return null;
 		} else {
-			logger.info("convertMethod may be a problem not found the convertMethod[{}]", convert.getConvertMethod());
+			logger.info("Notice: Unknow convertMethod[{}]", convert.getConvertMethod());
 		}
 		return value;
 	}
