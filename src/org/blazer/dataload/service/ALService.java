@@ -489,6 +489,8 @@ public class ALService {
 			return value.toUpperCase();
 		} else if (convert.getConvertMethod().equalsIgnoreCase("empty2null") && "".equals(value)) {
 			return null;
+		}  else if (convert.getConvertMethod().equalsIgnoreCase("empty2zero") && "".equals(value)) {
+			return "0";
 		} else {
 			logger.info("Notice: Unknow convertMethod[{}]", convert.getConvertMethod());
 		}
