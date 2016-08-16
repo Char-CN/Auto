@@ -20,6 +20,7 @@ import org.blazer.common.util.StringUtil;
  */
 public class RunManager {
 
+	@SuppressWarnings({ "unchecked", "rawtypes" })
 	public static void main(String[] args) {
 		if (args.length < 1) {
 			System.out.println("==RunManager== " + "Usage: java -jar pkg.mainclass [parameters...]");
@@ -27,13 +28,15 @@ public class RunManager {
 		}
 		String pkgMainClass = convertPkgMainClassMapping(args[0]);
 		try {
-			Method mainMethod = Class.forName(pkgMainClass).getMethod("main", String[].class);
+			Class cls = Class.forName(pkgMainClass);
+			Method mainMethod = cls.getMethod("main", String[].class);
 			// 加载第三方Driver
 			addExtLib();
 			// 调用
-			mainMethod.invoke(null, (Object) StringUtil.removeIndex(args, 0));
+			mainMethod.invoke(cls.getClass(), (Object) StringUtil.removeIndex(args, 0));
 		} catch (Exception e) {
-			System.out.println("==RunManager== " + e.getMessage() + e);
+			System.out.println("==RunManager== " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 
@@ -59,7 +62,8 @@ public class RunManager {
 				}
 			}
 		} catch (Exception e) {
-			System.out.println("==RunManager== " + e.getMessage() + e);
+			System.out.println("==RunManager== " + e.getMessage());
+			e.printStackTrace();
 		}
 	}
 

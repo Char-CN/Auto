@@ -926,6 +926,7 @@ public class ALService {
 			aifb.setAlInputFileFieldNotDimBeans(notDimBeans);
 			aifb.setExtInputSQLList(new ArrayList<String>());
 			aifb.setCurrentFileVar(new HashMap<String, String>());
+			aifb.setExtOldInputSQLList(new ArrayList<String>());
 			list.add(aifb);
 		}
 		long l2 = System.currentTimeMillis();
