@@ -22,4 +22,19 @@ version:2.0.1
 java -jar AutoUtil.jar AL \* \*
 
 
+默认快速配置：
+SET @x=0;
+SET @db='dw_realtime';
+SET @tb='rt_index_kpi';
+SELECT CONCAT('INSERT INTO ',@db,'.',@tb,'(',GROUP_CONCAT(colName),')',
+	' VALUES(',GROUP_CONCAT(CONCAT('{',rowNum,'}')),') ON DUPLICATE KEY UPDATE ',
+	GROUP_CONCAT(CONCAT(colName,'=','{',rowNum,'}')),';'
+	) FROM (
+  SELECT @x:=IFNULL(@x,0)+1 AS rowNum,t.`COLUMN_NAME` AS colName FROM information_schema.`COLUMNS` t
+  WHERE t.`TABLE_NAME`=@tb
+  AND t.`COLUMN_NAME` != 'ctime'
+  AND t.`COLUMN_NAME` != 'mtime'
+) tmp
+;
+
 
