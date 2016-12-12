@@ -20,6 +20,11 @@ public class Count {
 		return count;
 	}
 
+	public int getPreviousCount() {
+		int pre = count - 1;
+		return pre < 0 ? 0 : pre;
+	}
+
 	public void add(int number) {
 		this.count += number;
 	}

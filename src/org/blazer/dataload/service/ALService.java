@@ -699,7 +699,7 @@ public class ALService {
 			executeDao.batchUpdateTranstaion(inputFile.getExtInputSQLList(), count);
 		} catch (RuntimeException e) {
 			logger.error("error row : [{}]", count.getCount());
-			logger.error("error sql : [{}]", inputFile.getExtInputSQLList().get(count.getCount() - 1));
+			logger.error("error sql : [{}]", inputFile.getExtInputSQLList().get(count.getPreviousCount()));
 			throw e;
 		} finally {
 			long l2 = System.currentTimeMillis();
@@ -755,7 +755,7 @@ public class ALService {
 			setExtInfo(fileField);
 		} catch (RuntimeException e) {
 			logger.error("error row : [{}]", count.getCount());
-			logger.error("error sql : [{}]", fileField.getExtInputSQLList().get(count.getCount() - 1));
+			logger.error("error sql : [{}]", fileField.getExtInputSQLList().get(count.getPreviousCount()));
 			throw e;
 		} finally {
 			long l2 = System.currentTimeMillis();
@@ -791,7 +791,7 @@ public class ALService {
 			executeDao.batchUpdateTranstaion(beforeBean.getExtInputSQLList(), count);
 		} catch (RuntimeException e) {
 			logger.error("error row : [{}]", count.getCount());
-			logger.error("error sql : [{}]", beforeBean.getExtInputSQLList().get(count.getCount() - 1));
+			logger.error("error sql : [{}]", beforeBean.getExtInputSQLList().get(count.getPreviousCount()));
 			throw e;
 		} finally {
 			long l2 = System.currentTimeMillis();
