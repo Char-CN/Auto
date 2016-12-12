@@ -20,7 +20,7 @@ public class Count {
 		return count;
 	}
 
-	public int getPreviousCount() {
+	public int getPrevious() {
 		int pre = count - 1;
 		return pre < 0 ? 0 : pre;
 	}
