@@ -12,6 +12,6 @@ package org.blazer.dataload.model;
  */
 public enum InputMode {
 
-	Trunsaction, FaultTolerant
+	Transaction, FaultTolerant
 
 }

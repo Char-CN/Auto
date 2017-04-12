@@ -696,7 +696,12 @@ public class ALService {
 					break;
 				}
 			}
-			executeDao.batchUpdateTranstaion(inputFile.getExtInputSQLList(), count);
+			// 判断是事务模式还是容错模式
+			if (inputFile.getInputMode() == InputMode.Transaction) {
+				executeDao.batchUpdateTranstaion(inputFile.getExtInputSQLList(), count);
+			} else {
+				executeDao.batchUpdateFaultTolerant(inputFile.getExtInputSQLList(), count);
+			}
 		} catch (RuntimeException e) {
 			logger.error("error row : [{}]", count.getCount());
 			logger.error("error sql : [{}]", inputFile.getExtInputSQLList().get(count.getPrevious()));
@@ -872,7 +877,7 @@ public class ALService {
 			aifb.setInputSql(StringUtil.getString(map.get("InputSql")));
 			// 事务模式 或 容错模式
 			if (map.get("InputMode") == null || "1".equals(StringUtil.getString(map.get("InputMode")))) {
-				aifb.setInputMode(InputMode.Trunsaction);
+				aifb.setInputMode(InputMode.Transaction);
 			} else {
 				aifb.setInputMode(InputMode.FaultTolerant);
 			}

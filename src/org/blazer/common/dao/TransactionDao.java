@@ -109,6 +109,29 @@ public class TransactionDao implements Dao {
 		}
 	}
 
+	public void batchUpdateFaultTolerant(String[] sqls, Count count) throws RuntimeException {
+		logger.debug("=====batchUpdateFaultTolerant===== Length : {}", sqls.length);
+		try {
+			logger.info("batchUpdateFaultTolerant begin");
+			for (String sql : sqls) {
+				count.add(1);
+				try {
+					jdbcTemplate.update(sql);
+				} catch (Exception e) {
+					count.add(-1);
+				}
+				if (count.modZero())
+					logger.info("imported " + count.getCount());
+			}
+			if (count.getCount() == 0 || !count.modZero())
+				logger.info("imported " + count.getCount());
+			logger.info("batchUpdateFaultTolerant commit");
+		} catch (RuntimeException e) {
+			logger.error("batchUpdateFaultTolerant rollback");
+			throw e;
+		}
+	}
+
 	public void batchUpdateTranstaion(List<String> sqls) throws RuntimeException {
 		batchUpdateTranstaion(sqls, 5000);
 	}
@@ -136,6 +159,29 @@ public class TransactionDao implements Dao {
 		} catch (RuntimeException e) {
 			rollback();
 			logger.error("batchUpdateTranstaion rollback");
+			throw e;
+		}
+	}
+
+	public void batchUpdateFaultTolerant(List<String> sqls, Count count) throws RuntimeException {
+		logger.debug("=====batchUpdateFaultTolerant===== Length : {}", sqls.size());
+		try {
+			logger.info("batchUpdateFaultTolerant begin");
+			for (String sql : sqls) {
+				count.add(1);
+				try {
+					jdbcTemplate.update(sql);
+				} catch (Exception e) {
+					count.add(-1);
+				}
+				if (count.modZero())
+					logger.info("imported " + count.getCount());
+			}
+			if (count.getCount() == 0 || !count.modZero())
+				logger.info("imported " + count.getCount());
+			logger.info("batchUpdateFaultTolerant commit");
+		} catch (RuntimeException e) {
+			logger.error("batchUpdateFaultTolerant rollback");
 			throw e;
 		}
 	}

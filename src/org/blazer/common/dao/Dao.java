@@ -25,11 +25,15 @@ public interface Dao {
 
 	void batchUpdateTranstaion(String[] sqls, Count count) throws RuntimeException;
 
+	void batchUpdateFaultTolerant(String[] sqls, Count count) throws RuntimeException;
+
 	void batchUpdateTranstaion(List<String> sqls) throws RuntimeException;
 
 	void batchUpdateTranstaion(List<String> sqls, Integer interval) throws RuntimeException;
 
 	void batchUpdateTranstaion(List<String> sqls, Count count) throws RuntimeException;
+
+	void batchUpdateFaultTolerant(List<String> sqls, Count count) throws RuntimeException;
 
 	void update(String updateSql, Object... args) throws RuntimeException;
 
