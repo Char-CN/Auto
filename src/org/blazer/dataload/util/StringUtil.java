@@ -1,7 +1,6 @@
 package org.blazer.dataload.util;
 
 import java.util.ArrayList;
-
 import java.util.List;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -49,7 +48,7 @@ public class StringUtil extends org.blazer.common.util.StringUtil {
 			return str;
 		}
 		// 兼容支持yyyy-MM-dd的日期转换
-		if (reg.indexOf("yy") > -1 && reg.indexOf("MM") > -1) {
+		if (reg.indexOf("yy") > -1 || reg.indexOf("M") > -1 || reg.indexOf("d") > -1) {
 			return DateUtil.format(DateUtil.format(str, reg), customStr);
 		}
 		List<String> list = findStrByReg(str, reg);
@@ -75,7 +74,7 @@ public class StringUtil extends org.blazer.common.util.StringUtil {
 		return retStr;
 	}
 
-	public static void main(String[] args) {
+	public static void main(String[] args) throws Exception {
 		java.util.regex.Pattern p = java.util.regex.Pattern.compile("\\w+(\\d{2})\\w+");
 		Matcher m = p.matcher("qweqew34sdsa12sd");
 		while (m.find()) {
@@ -101,6 +100,9 @@ public class StringUtil extends org.blazer.common.util.StringUtil {
 		System.out.println(replaceAllByReg("sds2d中国人s1ds", "(\\W)", "#A#_{.}"));
 		System.out.println(replaceAllByReg("sasd12", "(.*)", "asdasd{.}"));
 		System.out.println(replaceAllByReg("", "", "#E#_#F#_#G#"));
+		System.out.println(replaceAllByReg("0000-00-00", "yyyy-MM-dd", "yyyy-MM-dd"));
+		System.out.println(DateUtil.format("0000-00-00", "yyyy-MM-dd"));
+		System.out.println(new java.text.SimpleDateFormat("yyyy-MM-dd").parse("0000-00-00"));
 	}
 
 }

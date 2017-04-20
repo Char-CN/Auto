@@ -248,7 +248,7 @@ public class ALService {
 		// 1.提高效率
 		// 2.修复bug：直接replace会导致:前一个中含有本次需要replace的key的值,将前一个中的参数也替换成本参数
 		List<List<SQLParser>> sqlParserLists = SqlUtil.placeholderMappingPoints(oldSqlList);
-		Count count = new Count(0, 5000);
+		Count count = new Count();
 		for (HashMap<String, String> columnMap : rowList) {
 			count.add(1);
 			for (int i = 0; i < oldSqlList.size(); i++) {
@@ -287,7 +287,7 @@ public class ALService {
 		// 1.提高效率
 		// 2.修复bug：直接replace会导致:前一个中含有本次需要replace的key的值,将前一个中的参数也替换成本参数
 		List<List<SQLParser>> sqlParserLists = SqlUtil.placeholderMappingPoints(oldSqlList);
-		Count count = new Count(0, 5000);
+		Count count = new Count();
 		for (HashMap<String, String> columnMap : rowList) {
 			count.add(1);
 			for (int i = 0; i < oldSqlList.size(); i++) {
@@ -467,12 +467,13 @@ public class ALService {
 	}
 
 	/**
-	 * 正则转换
+	 * 正则转换，兼容支持yyyy-MM-dd的日期转换
 	 */
 	private static String getReplaceByReg(final String value, final ALConvert convert) {
 		if (StringUtils.isBlank(value)) {
 			return value;
 		}
+		// 兼容支持yyyy-MM-dd的日期转换
 		return StringUtil.replaceAllByReg(value, convert.getOldFormat(), convert.getNewFormat());
 	}
 
@@ -685,7 +686,7 @@ public class ALService {
 		logger.info("-- param sqls length : {}", inputFile.getExtInputSQLList().size());
 		logger.info("-- param dataSource  : {}", inputFile.getDataSourceBean());
 		Dao executeDao = CustomJdbcDao.getDao(inputFile.getDataSourceBean().getRecordId());
-		Count count = new Count(0, 5000);
+		Count count = new Count();
 		try {
 			int i = 1;
 			for (String record : inputFile.getExtInputSQLList()) {
@@ -744,7 +745,7 @@ public class ALService {
 		logger.info("-- param dataSource  : {}", fileField.getDataSourceBean());
 		logger.info("-- param sqls length : {}", fileField.getExtInputSQLList().size());
 		Dao executeDao = CustomJdbcDao.getDao(fileField.getDataSourceBean().getRecordId());
-		Count count = new Count(0, 5000);
+		Count count = new Count();
 		try {
 			int i = 1;
 			for (String record : fileField.getExtInputSQLList()) {
@@ -782,7 +783,7 @@ public class ALService {
 		logger.info("-- param dataSource  : {}", beforeBean.getDataSourceBean());
 		logger.info("-- param sqls length : {}", beforeBean.getExtInputSQLList().size());
 		Dao executeDao = CustomJdbcDao.getDao(beforeBean.getDataSourceBean().getRecordId());
-		Count count = new Count(0, 5000);
+		Count count = new Count();
 		try {
 			int i = 1;
 			for (String record : beforeBean.getExtInputSQLList()) {

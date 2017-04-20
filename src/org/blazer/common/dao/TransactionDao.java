@@ -114,17 +114,19 @@ public class TransactionDao implements Dao {
 		try {
 			logger.info("batchUpdateFaultTolerant begin");
 			for (String sql : sqls) {
-				count.add(1);
 				try {
 					jdbcTemplate.update(sql);
+					count.add(1);
 				} catch (Exception e) {
-					count.add(-1);
+					count.addErrorCount(1);
+					logger.warn("error row[" + (count.getCount() + count.getErrorCount()) + "] sql:" + sql);
 				}
 				if (count.modZero())
 					logger.info("imported " + count.getCount());
 			}
 			if (count.getCount() == 0 || !count.modZero())
 				logger.info("imported " + count.getCount());
+			logger.info("imported total error " + count.getErrorCount());
 			logger.info("batchUpdateFaultTolerant commit");
 		} catch (RuntimeException e) {
 			logger.error("batchUpdateFaultTolerant rollback");
@@ -168,17 +170,19 @@ public class TransactionDao implements Dao {
 		try {
 			logger.info("batchUpdateFaultTolerant begin");
 			for (String sql : sqls) {
-				count.add(1);
 				try {
 					jdbcTemplate.update(sql);
+					count.add(1);
 				} catch (Exception e) {
-					count.add(-1);
+					count.addErrorCount(1);
+					logger.warn("error row[" + (count.getCount() + count.getErrorCount()) + "] sql:" + sql);
 				}
 				if (count.modZero())
 					logger.info("imported " + count.getCount());
 			}
 			if (count.getCount() == 0 || !count.modZero())
 				logger.info("imported " + count.getCount());
+			logger.info("imported total error " + count.getErrorCount());
 			logger.info("batchUpdateFaultTolerant commit");
 		} catch (RuntimeException e) {
 			logger.error("batchUpdateFaultTolerant rollback");

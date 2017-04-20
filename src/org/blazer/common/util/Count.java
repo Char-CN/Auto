@@ -6,18 +6,32 @@ public class Count {
 
 	int interval;
 
-	public Count(int count, int interval) {
-		this.count = count;
-		this.interval = interval;
+	int errorCount;
+
+	public Count(int interval, int count) {
+		init(interval, count);
 	}
 
-	public Count(int count) {
+	public Count(int interval) {
+		init(interval, 0);
+	}
+
+	public Count() {
+		init(5000, 0);
+	}
+
+	public void init(int interval, int count) {
+		this.interval = interval;
 		this.count = count;
-		this.interval = 5000;
+		this.errorCount = 0;
 	}
 
 	public int getCount() {
 		return count;
+	}
+
+	public int getErrorCount() {
+		return errorCount;
 	}
 
 	public int getPrevious() {
@@ -29,10 +43,14 @@ public class Count {
 		this.count += number;
 	}
 
+	public void addErrorCount(int number) {
+		this.errorCount += number;
+	}
+
 	public int getInterval() {
 		return interval;
 	}
-	
+
 	public boolean modZero() {
 		return this.count % this.interval == 0;
 	}
