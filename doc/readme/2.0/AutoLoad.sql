@@ -55,6 +55,7 @@ CREATE TABLE `AL_InputFile` (
   `FileRegExp` varchar(200) DEFAULT NULL COMMENT '导入的文件名的正则表达式，匹配该正则的文件都会被扫描到',
   `FileSeparator` varchar(20) DEFAULT '	' COMMENT '文件分隔符',
   `InputSql` text COMMENT '配置INSERT语句，如：INSERT INTO HYY_TB(Name,#UP#=Age) Values({1},{2})；其中{1},{2}表示读取文件的第1个和第2个字段，如果字段中配置了#UP#=，那么会自动生成ON DUPLICATE KEY语句，对应update配置#UP#的字段',
+  `InputMode` int(9) DEFAULT '1' COMMENT 'INSERT模式，0表示容错模式，1表示事务模式',
   `Sort` int(11) DEFAULT NULL COMMENT '扫描导入文件的顺序，从小到大',
   `Enable` int(9) DEFAULT '1' COMMENT '是否可用，0表示不可用，1表示可用',
   `MTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
@@ -66,7 +67,7 @@ CREATE TABLE `AL_InputFile` (
 --  Records of `AL_InputFile`
 -- ----------------------------
 BEGIN;
-INSERT INTO `AL_InputFile` VALUES ('1', '1', null, 'hyy', '/Users/hyy/Work/data', 'hyy.csv', '\\t', 'insert into hyy values({1},{2})', '1', '0', '2016-01-28 15:21:39', null), ('2', '1', '2', 'hyy', '/Users/hyy/Work/data', 'hyy.csv', '\\t', '{1}\\t{2}\\t{3}', '2', '0', '2016-01-28 15:21:43', null), ('10', '1', null, '案例一事实一', '/Users/hyy/Work/data', 'fact_sales_\\d*_\\d*.csv', '\\t', 'INSERT INTO Fact_Sales(PeriodKey,DayKey,ProductID,SalesmanID,SpotPriceTotal,SalePriceTotal) VALUES({PeriodKey},{DayKey},{ProductID},{SalesmanID},{4},{5})', '3', '1', '2016-01-29 18:25:06', null);
+INSERT INTO `AL_InputFile` VALUES ('1', '1', null, 'hyy', '/Users/hyy/Work/data', 'hyy.csv', '\\t', 'insert into hyy values({1},{2})', '1', '1', '0', '2016-01-28 15:21:39', null), ('2', '1', '2', 'hyy', '/Users/hyy/Work/data', 'hyy.csv', '\\t', '{1}\\t{2}\\t{3}', '1', '2', '0', '2016-01-28 15:21:43', null), ('10', '1', null, '案例一事实一', '/Users/hyy/Work/data', 'fact_sales_\\d*_\\d*.csv', '\\t', 'INSERT INTO Fact_Sales(PeriodKey,DayKey,ProductID,SalesmanID,SpotPriceTotal,SalePriceTotal) VALUES({PeriodKey},{DayKey},{ProductID},{SalesmanID},{4},{5})', '1', '3', '1', '2016-01-29 18:25:06', null);
 COMMIT;
 
 -- ----------------------------
@@ -157,8 +158,8 @@ CREATE TABLE `AL_InputFileLog` (
   `RecordID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
   `GroupID` bigint(20) DEFAULT NULL COMMENT '关联表AL_InputGroup',
   `FileID` bigint(20) DEFAULT NULL COMMENT '关联表AL_InputFile',
-  `RealFilePath` varchar(256) DEFAULT NULL COMMENT '真实的文件路径',
-  `RealFileName` varchar(128) DEFAULT NULL COMMENT '真实的文件名',
+  `RealFilePath` varchar(200) DEFAULT NULL COMMENT '真实的文件路径',
+  `RealFileName` varchar(100) DEFAULT NULL COMMENT '真实的文件名',
   `Result` varchar(16) DEFAULT NULL COMMENT '执行结果，0.fail | 1.success',
   `Detail` text COMMENT '日志详情，错误信息',
   `IsRead` tinyint(1) DEFAULT '0' COMMENT '是否已读，默认0是未读',
