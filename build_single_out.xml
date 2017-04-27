@@ -18,7 +18,7 @@
 
 	<property name="output.dir" value="single_out" />
 	<property name="name" value="AutoUtil" />
-	<property name="jarname" value="${name}-2.0.1" />
+	<property name="jarname" value="${name}-2.1" />
 	<property name="mainclass" value="org.blazer.common.run.RunManager" />
 
 	<!-- 第三方jar包的路径 -->

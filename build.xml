@@ -20,7 +20,7 @@
 	<property name="output.dir" value="out" />
 	<property name="tar.dir" value="tar" />
 	<property name="name" value="Auto" />
-	<property name="version" value="2.0.1" />
+	<property name="version" value="2.1" />
 	<property name="mainclass" value="org.blazer.common.run.RunManager" />
 
 	<!-- 第三方jar包的路径 -->
