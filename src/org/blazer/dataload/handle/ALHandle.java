@@ -37,7 +37,7 @@ public class ALHandle {
 
 	public static void main(String[] args) {
 		// String[] testArgs = new String[] { "*", "144,146" };
-		String[] testArgs = new String[] { "1", "*" };
+		String[] testArgs = new String[] { "*", "12" };
 		ApplicationUtil.init(SourceUtil.resource + "logback_autoload.xml");
 		ALHandle handle = (ALHandle) ApplicationUtil.getBean("ALHandle");
 		// testArgs = args;
@@ -344,6 +344,7 @@ public class ALHandle {
 						logger.info("===        to [{}]", destinationPath);
 						logger.info("===    result [fail]");
 					}
+					logger.info("===    istest [{}]", isTest);
 					step = 20;
 					long oneTimeEnd = System.currentTimeMillis();
 					long time = oneTimeEnd - oneTimeBegin;

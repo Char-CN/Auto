@@ -876,7 +876,7 @@ public class ALService {
 			}
 			aifb.setFileRegExp(StringUtil.getString(map.get("FileRegExp")));
 			aifb.setInputSql(StringUtil.getString(map.get("InputSql")));
-			// 事务模式 或 容错模式
+			// 1.事务模式 或 0.容错模式
 			if (map.get("InputMode") == null || "1".equals(StringUtil.getString(map.get("InputMode")))) {
 				aifb.setInputMode(InputMode.Transaction);
 			} else {

@@ -48,8 +48,11 @@ public class StringUtil extends org.blazer.common.util.StringUtil {
 			return str;
 		}
 		// 兼容支持yyyy-MM-dd的日期转换
-		if (reg.indexOf("yy") > -1 || reg.indexOf("M") > -1 || reg.indexOf("d") > -1) {
-			return DateUtil.format(DateUtil.format(str, reg), customStr);
+		if (reg.indexOf("yy") > -1 || reg.indexOf("M") > -1 || reg.indexOf("dd") > -1) {
+			try {
+				return DateUtil.format(DateUtil.format(str, reg), customStr);
+			} catch (Exception e) {
+			}
 		}
 		List<String> list = findStrByReg(str, reg);
 		boolean bol = customStr.equals("{.}");
@@ -93,8 +96,10 @@ public class StringUtil extends org.blazer.common.util.StringUtil {
 		// System.out.println(str1.replaceAll("\\d{4}-\\d{2}-\\d{2}",
 		// getRegexpValue(str, rep2)));
 		System.out.println("asdasd#A# #B#".replaceAll("#A#", "{0}"));
-		System.out.println(replaceAllByReg("20121222", "\\d{4}\\d{2}\\d{2}", "{0}-{1}-{2}"));
-		System.out.println(replaceAllByReg("20121222", "(\\d{4})(\\d{2})(\\d{2})", "{0}-{1}-{1}"));
+		System.out.println(replaceAllByReg("20121222", "\\d{4}\\d{2}\\d{2}", "{1}-{2}-{3}"));
+		assert(replaceAllByReg("20121222", "(\\d{4})(\\d{2})(\\d{2})", "{1}-{2}-{3}") == "2012-12-22");
+		assert(replaceAllByReg("20121222", "\\d{4}\\d{2}\\d{2}", "{1}-{2}-{3}") == "2012-12-22");
+		System.out.println(replaceAllByReg("20121222", "(\\d{4})(\\d{2})(\\d{2})", "{1}-{2}-{2}"));
 		System.out.println(replaceAllByReg("2012-12-22", "(\\d{4})-(\\d{2})-(\\d{2})", "{.}"));
 		System.out.println(replaceAllByReg("sdsaqsq2012-12-22ssasq", "(\\w*)(\\d{4})-(\\d{2})-(\\d{2})", "^\\w*(\\d{4})-(\\d{2})-(\\d{2})\\w*$"));
 		System.out.println(replaceAllByReg("sds2d中国人s1ds", "(\\W)", "#A#_{.}"));
