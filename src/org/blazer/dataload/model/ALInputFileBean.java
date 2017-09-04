@@ -40,6 +40,8 @@ public class ALInputFileBean {
 
 	private List<ALInputFileBeforeBean> alInputFileBeforeBeans;
 
+	private List<ALInputFileAfterBean> alInputFileAfterBeans;
+
 	private List<ALInputFileConstantBean> alInputFileConstantBeans;
 
 	private String extFilePathSuccess;
@@ -124,6 +126,14 @@ public class ALInputFileBean {
 
 	public void setAlInputFileBeforeBeans(List<ALInputFileBeforeBean> alInputFileBeforeBeans) {
 		this.alInputFileBeforeBeans = alInputFileBeforeBeans;
+	}
+
+	public List<ALInputFileAfterBean> getAlInputFileAfterBeans() {
+		return alInputFileAfterBeans;
+	}
+
+	public void setAlInputFileAfterBeans(List<ALInputFileAfterBean> alInputFileAfterBeans) {
+		this.alInputFileAfterBeans = alInputFileAfterBeans;
 	}
 
 	public List<ALInputFileConstantBean> getAlInputFileConstantBeans() {
@@ -248,8 +258,8 @@ public class ALInputFileBean {
 
 	@Override
 	public String toString() {
-		return "ALInputFileBean [recordId=" + recordId + ", groupId=" + groupId + ", fileName=" + fileName + ", filePath=" + filePath + ", fileRegExp="
-				+ fileRegExp + ", inputSql=" + inputSql + ", fileSeparator=" + fileSeparator + ", sort=" + sort + ", enable=" + enable + "]";
+		return "ALInputFileBean [recordId=" + recordId + ", groupId=" + groupId + ", fileName=" + fileName + ", filePath=" + filePath + ", fileRegExp=" + fileRegExp
+				+ ", inputSql=" + inputSql + ", fileSeparator=" + fileSeparator + ", sort=" + sort + ", enable=" + enable + "]";
 	}
 
 }

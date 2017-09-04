@@ -28,7 +28,7 @@ CREATE TABLE `AL_DataSource` (
   `Url` varchar(256) DEFAULT NULL COMMENT '连接字符串',
   `UserName` varchar(64) DEFAULT NULL COMMENT '用户名',
   `Password` varchar(64) DEFAULT NULL COMMENT '密码',
-  `Enable` tinyint(1) DEFAULT NULL COMMENT '是否可用，0表示不可用，1表示可用',
+  `Enable` tinyint(1) NULL DEFAULT 1 COMMENT '是否可用，0表示不可用，1表示可用',
   `MTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `CTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`RecordID`),
@@ -81,6 +81,7 @@ CREATE TABLE `AL_InputFileBefore` (
   `BeforeSql` text COMMENT '在导入每个文件时，需要执行的SQL语句，可以配置成如：delete from table where PeriodKey={PeriodKey} and DayKey={DayKey}，这些占位字段需要在AL_InputFileConstant中配置',
   `Sort` int(9) DEFAULT NULL COMMENT '执行顺序，从小到大',
   `Enable` int(9) DEFAULT '1' COMMENT '是否可用，0表示不可用，1表示可用',
+  `Remark` text COMMENT '备注信息',
   `MTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
   `CTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
   PRIMARY KEY (`RecordID`)
@@ -90,8 +91,25 @@ CREATE TABLE `AL_InputFileBefore` (
 --  Records of `AL_InputFileBefore`
 -- ----------------------------
 BEGIN;
-INSERT INTO `AL_InputFileBefore` VALUES ('1', '10', null, 'delete from Fact_Sales where PeriodKey={PeriodKey} and DayKey={DayKey}', '1', '1', '2016-01-29 18:24:13', '2016-01-29 18:17:08');
+INSERT INTO `AL_InputFileBefore` VALUES ('1', '10', null, 'delete from Fact_Sales where PeriodKey={PeriodKey} and DayKey={DayKey}', '1', '1', '', '2016-01-29 18:24:13', '2016-01-29 18:17:08');
 COMMIT;
+
+-- ----------------------------
+-- Table structure for AL_InputFileAfter
+-- ----------------------------
+DROP TABLE IF EXISTS `AL_InputFileAfter`;
+CREATE TABLE `AL_InputFileAfter` (
+  `RecordID` bigint(20) NOT NULL AUTO_INCREMENT COMMENT '记录ID',
+  `FileID` bigint(20) DEFAULT NULL COMMENT '关联表AL_InputFile',
+  `DataSourceID` bigint(20) DEFAULT NULL COMMENT '关联表AL_DataSource',
+  `AfterSql` text COMMENT '在导入每个文件后，需要执行的SQL语句，可以配置成如：delete from table where PeriodKey={PeriodKey} and DayKey={DayKey}，这些占位字段需要在AL_InputFileConstant中配置',
+  `Sort` int(9) DEFAULT NULL COMMENT '执行顺序，从小到大',
+  `Enable` int(9) DEFAULT '1' COMMENT '是否可用，0表示不可用，1表示可用',
+  `Remark` text COMMENT '备注信息',
+  `MTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
+  `CTime` timestamp NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  PRIMARY KEY (`RecordID`)
+) ENGINE=InnoDB AUTO_INCREMENT=2 DEFAULT CHARSET=utf8 COMMENT='说明：\r\n	该表配置导入每个文件后，可以先执行的一条SQL语句，有一种常见情况，就是你重新又生成了一次该csv，这种情况我们叫做重复导入，针对重要的情况，你可以根据文件名中体现出来的周期与日期维度将该数据删除，然后再导入mysql中，删除数据的那一步在这里配置，在导入每一个csv之前，都会执行一下delete sql。当然，你也可以不这么做。';
 
 -- ----------------------------
 --  Table structure for `AL_InputFileConstant`

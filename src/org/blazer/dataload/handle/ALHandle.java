@@ -13,6 +13,7 @@ import org.blazer.dataload.exception.DirectoryNotFoundException;
 import org.blazer.dataload.exception.FileEmptyException;
 import org.blazer.dataload.exception.UnknowDataSourceException;
 import org.blazer.dataload.exception.UnknowTargetSourceException;
+import org.blazer.dataload.model.ALInputFileAfterBean;
 import org.blazer.dataload.model.ALInputFileBean;
 import org.blazer.dataload.model.ALInputFileBeforeBean;
 import org.blazer.dataload.model.ALInputFileConstantBean;
@@ -30,6 +31,12 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+/**
+ * 这个类，很累。
+ * 
+ * @author hyy
+ *
+ */
 @Repository(value = "ALHandle")
 public class ALHandle {
 
@@ -37,7 +44,7 @@ public class ALHandle {
 
 	public static void main(String[] args) {
 		// String[] testArgs = new String[] { "*", "144,146" };
-		String[] testArgs = new String[] { "*", "12" };
+		String[] testArgs = new String[] { "*", "13" };
 		ApplicationUtil.init(SourceUtil.resource + "logback_autoload.xml");
 		ALHandle handle = (ALHandle) ApplicationUtil.getBean("ALHandle");
 		// testArgs = args;
@@ -100,7 +107,7 @@ public class ALHandle {
 	 * 
 	 * step15 : 判断目标是插入到Mysql,Hbase或者抛出UnknowTargetSourceException
 	 * 
-	 * step16.1 : 转换BeforeSql并且存入BeforeBean中
+	 * step16.1 : 转换BeforeSql并且存入BeforeBean中，转换AfterSql并且存入AfterBean中
 	 * 
 	 * step16.2 : 循环插入转换的维度的BeforeSql
 	 * 
@@ -109,6 +116,8 @@ public class ALHandle {
 	 * step17 : 转换插入的语句并存入AL_InputFileBean里
 	 * 
 	 * step18 : 循环插入转换的语句
+	 * 
+	 * step18.1 : 循环插入转换的维度的AfterSql
 	 * 
 	 * step19 : 根据flag判断是否执行成功,并移动文件到success或fail目录
 	 * 
@@ -232,12 +241,13 @@ public class ALHandle {
 						} else {
 							logger.info("=== row 1 length: [{}]", list.get(0).length);
 							if (list.get(0).length > FieldUtil.getDefaultSqlPlaceholderSize()) {
-								logger.warn("=== Notice : row 1 length > System Default Sql Placeholder Size [" + FieldUtil.getDefaultSqlPlaceholderSize() + "], may be a problem.");
+								logger.warn("=== Notice : row 1 length > System Default Sql Placeholder Size [" + FieldUtil.getDefaultSqlPlaceholderSize()
+										+ "], may be a problem.");
 							}
 							// 排序
 							List<HashMap.Entry<String, String>> sorts = MapUtil.sorts(rowList.get(0).entrySet());
 							for (int i = 0; i < sorts.size(); i++) {
-							    logger.info("=== row 1 Point[{}] : {}", sorts.get(i).getKey(), sorts.get(i).getValue());
+								logger.info("=== row 1 Point[{}] : {}", sorts.get(i).getKey(), sorts.get(i).getValue());
 							}
 						}
 						step = 11;
@@ -288,10 +298,11 @@ public class ALHandle {
 						} else if (aif.getDataSourceBean().getTargetSourceDBName().equalsIgnoreCase("mysql")) {
 							step = 16.1;
 							alService.convertSetInputBeforesSqls(aif);
+							alService.convertSetInputAftersSqls(aif);
 							step = 16.2;
 							// 执行在导入数据之前需要执行的sql语句
 							for (ALInputFileBeforeBean beforeBean : aif.getAlInputFileBeforeBeans()) {
-								alService.insertInputBefore(beforeBean);
+								alService.executeInputBefore(beforeBean);
 							}
 							step = 16.3;
 							alService.convertInputSqlsByMysql(aif);
@@ -300,6 +311,11 @@ public class ALHandle {
 							step = 18;
 							// 执行sql语句导入数据到mysql
 							alService.insertInputFile(aif);
+							step = 18.1;
+							// 执行在导入数据之后需要执行的sql语句
+							for (ALInputFileAfterBean afterBean : aif.getAlInputFileAfterBeans()) {
+								alService.executeInputAfter(afterBean);
+							}
 						} else {
 							throw new UnknowTargetSourceException("the target source is not found, please check you TargetSourceDBName is correct!");
 						}
@@ -362,7 +378,7 @@ public class ALHandle {
 					}
 					step = 100;
 					logger.info("======File processing end[{}][{}]======================", name, fileCount);
-					fileCount ++;
+					fileCount++;
 				}
 			} catch (UnknowDataSourceException e) {
 				alLogService.failLog(aif, e);

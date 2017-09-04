@@ -17,6 +17,7 @@ import org.blazer.dataload.datasource.CustomJdbcDao;
 import org.blazer.dataload.exception.UnknowDataSourceException;
 import org.blazer.dataload.model.ALConvert;
 import org.blazer.dataload.model.ALDataSourceBean;
+import org.blazer.dataload.model.ALInputFileAfterBean;
 import org.blazer.dataload.model.ALInputFileBean;
 import org.blazer.dataload.model.ALInputFileBeforeBean;
 import org.blazer.dataload.model.ALInputFileConstantBean;
@@ -49,6 +50,18 @@ public class ALService {
 					sql = sql.replace(constantBean.getFieldPointName(), SqlUtil.convertStr(constantBean.getResultValue()));
 				}
 				beforeBean.getExtInputSQLList().add(sql);
+			}
+		}
+	}
+
+	public void convertSetInputAftersSqls(final ALInputFileBean inputFileBean) throws Exception {
+		for (ALInputFileAfterBean afterBean : inputFileBean.getAlInputFileAfterBeans()) {
+			for (String sql : StringUtils.split(afterBean.getAfterSql(), ";")) {
+				// 先转换当前文件变量
+				for (ALInputFileConstantBean constantBean : afterBean.getInputFileBean().getAlInputFileConstantBeans()) {
+					sql = sql.replace(constantBean.getFieldPointName(), SqlUtil.convertStr(constantBean.getResultValue()));
+				}
+				afterBean.getExtInputSQLList().add(sql);
 			}
 		}
 	}
@@ -490,7 +503,7 @@ public class ALService {
 			return value.toUpperCase();
 		} else if (convert.getConvertMethod().equalsIgnoreCase("empty2null") && "".equals(value)) {
 			return null;
-		}  else if (convert.getConvertMethod().equalsIgnoreCase("empty2zero") && "".equals(value)) {
+		} else if (convert.getConvertMethod().equalsIgnoreCase("empty2zero") && "".equals(value)) {
 			return "0";
 		} else {
 			logger.info("Notice: Unknow convertMethod[{}]", convert.getConvertMethod());
@@ -776,7 +789,7 @@ public class ALService {
 	 * @param beforeBean
 	 * @throws UnknowDataSourceException
 	 */
-	public void insertInputBefore(ALInputFileBeforeBean beforeBean) throws UnknowDataSourceException {
+	public void executeInputBefore(ALInputFileBeforeBean beforeBean) throws UnknowDataSourceException {
 		long l1 = System.currentTimeMillis();
 		logger.info("----Begin----------------------------------------");
 		logger.info("-- param beforeBean  : {}", beforeBean);
@@ -807,8 +820,43 @@ public class ALService {
 	}
 
 	/**
-	 * 根据配置表，读取配置的需要导入的文件规则， 表：AL_InputGroup &
-	 * AL_InputFile & AL_DataSource
+	 * 执行在导入数据之后需要执行的sql语句
+	 * 
+	 * @param afterBean
+	 * @throws UnknowDataSourceException
+	 */
+	public void executeInputAfter(ALInputFileAfterBean afterBean) throws UnknowDataSourceException {
+		long l1 = System.currentTimeMillis();
+		logger.info("----Begin----------------------------------------");
+		logger.info("-- param afterBean  : {}", afterBean);
+		logger.info("-- param dataSource  : {}", afterBean.getDataSourceBean());
+		logger.info("-- param sqls length : {}", afterBean.getExtInputSQLList().size());
+		Dao executeDao = CustomJdbcDao.getDao(afterBean.getDataSourceBean().getRecordId());
+		Count count = new Count();
+		try {
+			int i = 1;
+			for (String record : afterBean.getExtInputSQLList()) {
+				if (i <= SysConfig.logPrintSqlSize) {
+					logger.info("-- param record {} : {}", i, record);
+					i++;
+				} else {
+					break;
+				}
+			}
+			executeDao.batchUpdateTranstaion(afterBean.getExtInputSQLList(), count);
+		} catch (RuntimeException e) {
+			logger.error("error row : [{}]", count.getCount());
+			logger.error("error sql : [{}]", afterBean.getExtInputSQLList().get(count.getPrevious()));
+			throw e;
+		} finally {
+			long l2 = System.currentTimeMillis();
+			logger.info("-- method cost time : {}", l2 - l1);
+			logger.info("----End------------------------------------------");
+		}
+	}
+
+	/**
+	 * 根据配置表，读取配置的需要导入的文件规则， 表：AL_InputGroup & AL_InputFile & AL_DataSource
 	 * 
 	 * @param groupIDs
 	 * @param fileIds
@@ -828,7 +876,8 @@ public class ALService {
 		sbSql.append(" LEFT JOIN (SELECT * FROM AL_DataSource WHERE Enable = 1) ads2 ON ads2.RecordID = aif.DataSourceID");
 		sbSql.append(" WHERE aig.`Enable` > 0");
 		sbSql.append(" AND aif.`Enable` > 0");
-		// sbSql.append(" AND (aig.RecordID IN (").append(groupIDs).append(") OR aif.RecordID IN (").append(fileIds).append("))");
+		// sbSql.append(" AND (aig.RecordID IN (").append(groupIDs).append(") OR
+		// aif.RecordID IN (").append(fileIds).append("))");
 		if (!groupIDs.equalsIgnoreCase("*")) {
 			String selectType = "";
 			if (groupIDs.toLowerCase().startsWith("notin")) {
@@ -917,6 +966,8 @@ public class ALService {
 			aifb.setAlInputFileConstantBeans(this.findFileConstantByFileID(aifb));
 			// 所有FileBefore
 			aifb.setAlInputFileBeforeBeans(this.findFileBeforeByFileID(aifb));
+			// 所有FileAfter
+			aifb.setAlInputFileAfterBeans(this.findFileAfterByFileID(aifb));
 			// 所有DimFileField
 			List<ALInputFileFieldBean> dimBeans = new ArrayList<ALInputFileFieldBean>();
 			// 所有NotDimFileField
@@ -1016,6 +1067,36 @@ public class ALService {
 			}
 			beforeBean.setExtInputSQLList(new ArrayList<String>());
 			list.add(beforeBean);
+		}
+		return list;
+	}
+
+	public List<ALInputFileAfterBean> findFileAfterByFileID(ALInputFileBean aifb) {
+		String sql = "SELECT * FROM AL_InputFileAfter WHERE FileID=? ORDER BY FileID ASC, Sort ASC, RecordID ASC";
+		List<Map<String, Object>> resultList = jdbcDao.find(sql, aifb.getRecordId());
+		List<ALInputFileAfterBean> list = new ArrayList<ALInputFileAfterBean>();
+		for (Map<String, Object> map : resultList) {
+			ALInputFileAfterBean afterBean = new ALInputFileAfterBean();
+			afterBean.setInputFileBean(aifb);
+			afterBean.setRecordId(IntegerUtil.getInteger(map.get("RecordID")));
+			afterBean.setFileId(IntegerUtil.getInteger(map.get("FileId")));
+			afterBean.setAfterSql(StringUtil.getString(map.get("AfterSql")));
+			// 目标数据源
+			if (IntegerUtil.getInteger(map.get("DataSourceID")) == null) {
+				afterBean.setDataSourceBean(aifb.getDataSourceBean());
+			} else {
+				ALDataSourceBean dataSourceBean = null;
+				try {
+					dataSourceBean = CustomJdbcDao.getDataSourceBean(IntegerUtil.getInteger(map.get("DataSourceID")));
+				} catch (UnknowDataSourceException e) {
+					dataSourceBean = new ALDataSourceBean();
+					dataSourceBean.setRecordId(null);
+					logger.info("UnknowDataSourceException id[{}]", IntegerUtil.getInteger(map.get("DataSourceID")));
+				}
+				afterBean.setDataSourceBean(dataSourceBean);
+			}
+			afterBean.setExtInputSQLList(new ArrayList<String>());
+			list.add(afterBean);
 		}
 		return list;
 	}
