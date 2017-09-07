@@ -19,19 +19,19 @@ public interface Dao {
 
 	Map<String, Object> findByUnique(String findSql);
 
-	void batchUpdateTranstaion(String[] sqls) throws RuntimeException;
+	void batchUpdateTransaction(String[] sqls) throws RuntimeException;
 
-	void batchUpdateTranstaion(String[] sqls, Integer interval) throws RuntimeException;
+	void batchUpdateTransaction(String[] sqls, Integer interval) throws RuntimeException;
 
-	void batchUpdateTranstaion(String[] sqls, Count count) throws RuntimeException;
+	void batchUpdateTransaction(String[] sqls, Count count) throws RuntimeException;
 
 	void batchUpdateFaultTolerant(String[] sqls, Count count) throws RuntimeException;
 
-	void batchUpdateTranstaion(List<String> sqls) throws RuntimeException;
+	void batchUpdateTransaction(List<String> sqls) throws RuntimeException;
 
-	void batchUpdateTranstaion(List<String> sqls, Integer interval) throws RuntimeException;
+	void batchUpdateTransaction(List<String> sqls, Integer interval) throws RuntimeException;
 
-	void batchUpdateTranstaion(List<String> sqls, Count count) throws RuntimeException;
+	void batchUpdateTransaction(List<String> sqls, Count count) throws RuntimeException;
 
 	void batchUpdateFaultTolerant(List<String> sqls, Count count) throws RuntimeException;
 

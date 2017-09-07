@@ -712,7 +712,7 @@ public class ALService {
 			}
 			// 判断是事务模式还是容错模式
 			if (inputFile.getInputMode() == InputMode.Transaction) {
-				executeDao.batchUpdateTranstaion(inputFile.getExtInputSQLList(), count);
+				executeDao.batchUpdateTransaction(inputFile.getExtInputSQLList(), count);
 			} else {
 				executeDao.batchUpdateFaultTolerant(inputFile.getExtInputSQLList(), count);
 			}
@@ -769,7 +769,7 @@ public class ALService {
 					break;
 				}
 			}
-			executeDao.batchUpdateTranstaion(fileField.getExtInputSQLList(), count);
+			executeDao.batchUpdateTransaction(fileField.getExtInputSQLList(), count);
 			// 重新加载KeyVal
 			setExtInfo(fileField);
 		} catch (RuntimeException e) {
@@ -807,7 +807,7 @@ public class ALService {
 					break;
 				}
 			}
-			executeDao.batchUpdateTranstaion(beforeBean.getExtInputSQLList(), count);
+			executeDao.batchUpdateTransaction(beforeBean.getExtInputSQLList(), count);
 		} catch (RuntimeException e) {
 			logger.error("error row : [{}]", count.getCount());
 			logger.error("error sql : [{}]", beforeBean.getExtInputSQLList().get(count.getPrevious()));
@@ -843,7 +843,7 @@ public class ALService {
 					break;
 				}
 			}
-			executeDao.batchUpdateTranstaion(afterBean.getExtInputSQLList(), count);
+			executeDao.batchUpdateTransaction(afterBean.getExtInputSQLList(), count);
 		} catch (RuntimeException e) {
 			logger.error("error row : [{}]", count.getCount());
 			logger.error("error sql : [{}]", afterBean.getExtInputSQLList().get(count.getPrevious()));
