@@ -44,6 +44,7 @@ public class ALService {
 
 	public void convertSetInputBeforesSqls(final ALInputFileBean inputFileBean) throws Exception {
 		for (ALInputFileBeforeBean beforeBean : inputFileBean.getAlInputFileBeforeBeans()) {
+			beforeBean.getExtInputSQLList().clear();
 			for (String sql : StringUtils.split(beforeBean.getBeforeSql(), ";")) {
 				// 先转换当前文件变量
 				for (ALInputFileConstantBean constantBean : beforeBean.getInputFileBean().getAlInputFileConstantBeans()) {
@@ -56,6 +57,7 @@ public class ALService {
 
 	public void convertSetInputAftersSqls(final ALInputFileBean inputFileBean) throws Exception {
 		for (ALInputFileAfterBean afterBean : inputFileBean.getAlInputFileAfterBeans()) {
+			afterBean.getExtInputSQLList().clear();
 			for (String sql : StringUtils.split(afterBean.getAfterSql(), ";")) {
 				// 先转换当前文件变量
 				for (ALInputFileConstantBean constantBean : afterBean.getInputFileBean().getAlInputFileConstantBeans()) {
