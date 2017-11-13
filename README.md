@@ -1,6 +1,6 @@
 # Auto
 
-背景：通常的ETL（Extract-Transform-Load），是先抓取数据，再进行清洗，再加载。清洗的时候也可能伴随着聚合运算。其中该项目是实现Load（L）这一步的，统一Transform（T）的输出为csv|tsv文件，然后将其导入到关系型数据库。
+背景：通常的ETL（Extract-Transform-Load），是先抓取数据，再进行清洗，再加载。清洗的时候也可能伴随着聚合运算。其中该项目是实现Load这一步的，统一Transform的输出为csv|tsv文件，然后将其导入到关系型数据库。
 
 流程：1.获取文件名信息，命名规则一般是，sales_fact_20171011_d.csv</br>
 　　　2.配置正则可抓取文件名中的日期变量</br>
